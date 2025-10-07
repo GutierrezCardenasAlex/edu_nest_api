@@ -5,8 +5,13 @@ import { BreedsModule } from './breeds/breeds.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { AppointmentsModule } from './appointments/appointments.module';
-import { PaymentsModule } from './payments/payments.module';
+import { CursosModule } from './Modul_cursos/cursos/cursos.module';
+import { CategoriasModule } from './Modul_cursos/categorias/categorias.module';
+import { TemariosModule } from './Modul_cursos/temarios/temarios.module';
+import { LeccionesModule } from './Modul_cursos/lecciones/lecciones.module';
+import { InscripcionesModule } from './Modul_cursos/inscripciones/inscripciones.module';
+import { ProgresoLeccionesModule } from './Modul_cursos/progreso-lecciones/progreso-lecciones.module';
+import { CertificadosModule } from './Modul_cursos/certificados/certificados.module';
 
 
 @Module({
@@ -33,8 +38,13 @@ import { PaymentsModule } from './payments/payments.module';
     }),
     UsersModule,
     AuthModule,
-    AppointmentsModule,
-    PaymentsModule,
+    CursosModule,
+    CategoriasModule,
+    TemariosModule,
+    LeccionesModule,
+    InscripcionesModule,
+    ProgresoLeccionesModule,
+    CertificadosModule,
   ],
   controllers: [],
   providers: [],
