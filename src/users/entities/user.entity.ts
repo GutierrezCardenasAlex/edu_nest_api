@@ -1,5 +1,6 @@
 import { Role } from "../../common/enums/rol.enum";
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Inscripcion } from "../../Modul_cursos/inscripciones/entities/inscripcion.entity";
 
 @Entity()
 export class User {
@@ -22,5 +23,8 @@ export class User {
     
     @DeleteDateColumn()
     deletedAt: Date;
+
+    @OneToMany(() => Inscripcion, (inscripcion) => inscripcion.usuario)
+    inscripciones: Inscripcion[];
     
 }
