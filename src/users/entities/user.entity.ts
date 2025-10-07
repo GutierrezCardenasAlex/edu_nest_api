@@ -1,5 +1,7 @@
+import { Appointment } from "src/appointments/entities/appointment.entity";
 import { Role } from "../../common/enums/rol.enum";
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+
 
 @Entity()
 export class User {
@@ -19,6 +21,9 @@ export class User {
     
     @Column({type:'enum',default: Role.USER, enum: Role})
     role: string;
+
+    @OneToMany(()=>Appointment,(appointement)=>appointement.user)
+    appointments:Appointment[];
     
     @DeleteDateColumn()
     deletedAt: Date;
