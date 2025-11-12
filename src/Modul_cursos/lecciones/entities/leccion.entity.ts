@@ -1,45 +1,47 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, } from 'typeorm';
+// src/Modul_cursos/lecciones/entities/leccion.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Temario } from '../../temarios/entities/temario.entity';
-import { OneToMany } from 'typeorm';
-
-export enum TipoLeccion {
-    VIDEO = 'video',
-    DOCUMENTO = 'documento',
-    ENLACE = 'enlace',
-    QUIZ = 'quiz',
-}
+import { ProgresoLeccion } from '../../progreso-lecciones/entities/progreso-leccion.entity';
 
 @Entity('lecciones')
 export class Leccion {
-    @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-    id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @ManyToOne(() => Temario, (temario) => temario.lecciones, { onDelete: 'CASCADE' })
-    temario: Temario;
+  @Column({ type: 'varchar', length: 255 })
+  titulo: string;
 
-    @Column({ type: 'varchar', length: 255 })
-    titulo: string;
+  @Column({ type: 'text', nullable: true })
+  descripcion?: string;
 
-    @Column({ type: 'text', nullable: true })
-    descripcion: string;
+  @Column({ type: 'text', nullable: true })
+  video_url?: string;
 
-    @Column({ type: 'enum', enum: TipoLeccion,
-        default: TipoLeccion.VIDEO })
-    tipo: TipoLeccion;
+  @Column({ type: 'integer', default: 0 })
+  duracion_minutos: number;
 
-    @Column({ type: 'varchar', length: 500, nullable: true })
-    urlRecurso?: string;
+  @Column({ type: 'integer', default: 0 })
+  orden: number;
 
-    @Column({type: 'varchar', length: 255, nullable: true})
-    archivo?: string;
+  @ManyToOne(() => Temario, (temario) => temario.lecciones, {
+    onDelete: 'CASCADE',
+  })
+  temario: Temario;
 
-    @Column({ type: 'int', default: 0 })
-    duracion: number;
+  @OneToMany(() => ProgresoLeccion, (progreso) => progreso.leccion)
+  progresos: ProgresoLeccion[];
 
-    @Column({ type: 'int', default: 0 })
-    orden: number;
+  @CreateDateColumn()
+  created_at: Date;
 
-    @CreateDateColumn({ name: 'create_at' })
-    createAt: Date;
-
+  @UpdateDateColumn()
+  updated_at: Date;
 }

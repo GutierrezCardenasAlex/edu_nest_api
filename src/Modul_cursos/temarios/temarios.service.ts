@@ -1,54 +1,48 @@
-import { Injectable } from '@nestjs/common';
+// src/Modul_cursos/temarios/temarios.service.ts
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Temario } from './entities/temario.entity';
 import { CreateTemarioDto } from './dto/create-temario.dto';
-import { UpdateTemarioDto } from './dto/update-temario.dto';
 import { Curso } from '../cursos/entities/curso.entity';
+
 
 @Injectable()
 export class TemariosService {
   constructor(
     @InjectRepository(Temario)
-    private readonly temarioRepository: Repository<Temario>,
+    private readonly temarioRepo: Repository<Temario>,
     @InjectRepository(Curso)
-    private readonly cursoRepository: Repository<Curso>,
+    private readonly cursoRepo: Repository<Curso>,
   ) {}
 
-  async create(dto: CreateTemarioDto): Promise<Temario> {
-    const curso = await this.cursoRepository.findOneBy({ id: dto.cursoId });
-    if (!curso) throw new Error('Curso no encontrado');
+  async crear(dto: CreateTemarioDto, userId: string) {
+    const curso = await this.cursoRepo.findOne({
+      where: { id: Number(dto.cursoId) },
+    });
 
-    const temario = this.temarioRepository.create({
-      titulo: dto.titulo,
-      orden: dto.orden ?? 0,
+    if (!curso) throw new NotFoundException('Curso no encontrado');
+    if (curso.docente_id !== Number(userId)) {
+      throw new ForbiddenException('Solo el instructor puede crear temarios');
+    }
+
+    const temario = this.temarioRepo.create({
+      ...dto,
       curso,
     });
-    return this.temarioRepository.save(temario);
+
+    return this.temarioRepo.save(temario);
   }
 
-  findAll(): Promise<Temario[]> {
-    return this.temarioRepository.find({ relations: ['curso'] });
-  }
-
-  async findOne(id: number): Promise<Temario> {
-    const temario = await this.temarioRepository.findOne({
-      where: { id },
-      relations: ['curso'],
+  async findByCurso(cursoId: string) {
+    return this.temarioRepo.find({
+      where: { curso: { id: Number(cursoId) } },
+      relations: ['lecciones'],
+      order: { orden: 'ASC', lecciones: { orden: 'ASC' } },
     });
-    if (!temario) throw new Error('Temario no encontrado');
-    return temario;
-  }
-
-  async update(id: number, dto: UpdateTemarioDto): Promise<Temario> {
-    const temario = await this.temarioRepository.findOneBy({ id });
-    if (!temario) throw new Error('Temario no encontrado');
-
-    Object.assign(temario, dto);
-    return this.temarioRepository.save(temario);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.temarioRepository.delete(id);
   }
 }

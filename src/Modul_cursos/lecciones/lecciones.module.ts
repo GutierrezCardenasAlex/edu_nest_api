@@ -1,14 +1,17 @@
+// src/Modul_cursos/lecciones/lecciones.module.ts
 import { Module } from '@nestjs/common';
-import { LeccionesService } from './lecciones.service';
-import { LeccionesController } from './lecciones.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LeccionesController } from './lecciones.controller';
+import { LeccionesService } from './lecciones.service';
 import { Leccion } from './entities/leccion.entity';
 import { Temario } from '../temarios/entities/temario.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Leccion, Temario])],
+  imports: [AuthModule,TypeOrmModule.forFeature([Leccion, Temario])],
+  controllers: [LeccionesController],
   providers: [LeccionesService],
-  controllers: [LeccionesController]
+  exports: [LeccionesService],
 })
 export class LeccionesModule {}

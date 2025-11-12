@@ -1,67 +1,58 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { RegisterDto } from './dto/register.dto';
-
-import * as bcrypt from 'bcryptjs';
-import { LoginDto } from './dto/login.dto';
+import {
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { retry } from 'rxjs';
+import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
+import { Role } from 'src/common/enums/rol.enum';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>, // ← Inyección correcta
+  ) {}
 
-    constructor(
-        private readonly usersService: UsersService,
-        private readonly jwtService: JwtService, 
-    ) {}
+  async register(dto: RegisterDto) {
+    const hashed = await bcrypt.hash(dto.password, 10);
 
-    async register({name, email, password}:RegisterDto) {
-        
-        const user = await this.usersService.findOneByEmail(email);
+    const user = this.userRepository.create({
+      name: dto.name,
+      email: dto.email,
+      password: hashed,
+      role: dto.role || Role.USER,
+    });
 
-        if (user) {
-            throw new BadRequestException('User already exists');
-        }
-        
-        await this.usersService.create({
-            name, 
-            email, 
-            password: await bcrypt.hash(password, 10)
-        });
+    return this.userRepository.save(user);
+  }
 
-        return {
-            message: 'User registered successfully',
-            name,
-            email,
-        };
-    }
+  async login(loginDto: LoginDto) {
+    const user = await this.usersService.findOneByEmail(loginDto.email);
+    if (!user) throw new UnauthorizedException('Credenciales inválidas');
 
-    async login({email, password}: LoginDto) {
-        
-        const user = await this.usersService.findOneByEmailWithPassword(email);
-        if (!user) {
-            throw new UnauthorizedException('Email is wrong');
-        }
+    const isMatch = await bcrypt.compare(loginDto.password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            throw new UnauthorizedException('Password is wrong');
-        }
+    const payload = {
+      sub: user.id,
+      username: user.email,
+      role: user.role,
+    };
 
-        const payload = { id: user.id, email: user.email, role: user.role   };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
+  }
 
-        const token = await this.jwtService.signAsync(payload);
-
-        return {
-            token,
-            email,
-        };
-    }
-    async profile({email,role}: {email: string, role: string}) {
-
-        //if(role !== 'admin') {
-        //   throw new UnauthorizedException('You are not authorized to access this resource');  
-        //}
-        return await this.usersService.findOneByEmail(email);
-    }
+  async profile(user: any) {
+    return this.usersService.findOne(user.userId);
+  }
 }

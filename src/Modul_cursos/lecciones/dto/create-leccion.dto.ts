@@ -1,31 +1,26 @@
-import { IsNotEmpty, IsOptional, IsEnum, IsInt } from "class-validator";
-import { TipoLeccion } from "../entities/leccion.entity";
+// src/Modul_cursos/lecciones/dto/create-leccion.dto.ts
+import { IsString, IsInt, Min, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateLeccionDto {
-    @IsNotEmpty()
-    temarioId: number;
+  @IsString()
+  titulo: string;
 
-    @IsNotEmpty()
-    titulo: string;
+  @IsString()
+  @IsOptional()
+  descripcion?: string;
 
-    @IsOptional()
-    descripcion?: string;
+  @IsString()
+  @IsOptional()
+  video_url?: string;
 
-    @IsOptional()
-    @IsEnum(TipoLeccion)
-    tipo?: TipoLeccion;
+  @IsInt()
+  @Min(0)
+  duracion_minutos: number;
 
-    @IsOptional()
-    urlRecurso?: string;    
+  @IsInt()
+  @Min(0)
+  orden: number;
 
-    @IsOptional()
-    archivo?: string;
-
-    @IsOptional()
-    @IsInt()
-    duracion?: number;
-
-    @IsOptional()
-    @IsInt()
-    orden?: number;
+  @IsUUID()
+  temarioId: string;
 }

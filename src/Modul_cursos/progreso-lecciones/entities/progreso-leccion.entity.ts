@@ -1,22 +1,43 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique, CreateDateColumn,} from 'typeorm';
+// src/Modul_cursos/progreso-lecciones/entities/progreso-leccion.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Unique,
+} from 'typeorm';
 import { Inscripcion } from '../../inscripciones/entities/inscripcion.entity';
 import { Leccion } from '../../lecciones/entities/leccion.entity';
 
 @Entity('progreso_lecciones')
 @Unique(['inscripcion', 'leccion'])
 export class ProgresoLeccion {
-    @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-    id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @ManyToOne(() => Inscripcion, (inscripcion) => inscripcion.id, { onDelete: 'CASCADE' })
-    inscripcion: Inscripcion;
+  @ManyToOne(() => Inscripcion, (i) => i.progresos, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  inscripcion: Inscripcion;
 
-    @ManyToOne(() => Leccion, (leccion) => leccion.id, { onDelete: 'CASCADE' })
-    leccion: Leccion;
+  @ManyToOne(() => Leccion, (l) => l.progresos, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  leccion: Leccion;
 
-    @Column({ type: 'boolean', default: false })
-    completado: boolean;
+  @Column({ type: 'boolean', default: false })
+  completada: boolean;
 
-    @CreateDateColumn({ name: 'fecha_completado', nullable: true })
-    fechaCompletado: Date; 
-}   
+  @Column({ type: 'timestamp', nullable: true })
+  fecha_completado?: Date;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+}

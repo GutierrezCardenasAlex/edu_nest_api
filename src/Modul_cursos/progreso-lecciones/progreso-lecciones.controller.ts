@@ -1,34 +1,48 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+// src/Modul_cursos/progreso-lecciones/progreso-lecciones.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import { ProgresoLeccionesService } from './progreso-lecciones.service';
-import { CreateProgresoLeccionDto } from './dto/create-progreso-leccion.dto';
-import { UpdateProgresoLeccionDto } from './dto/update-progreso-leccion.dto';
+import { CreateProgresoDto } from './dto/create-progreso-leccion.dto';
+import { UpdateProgresoDto } from './dto/update-progreso-leccion.dto';
 
 @Controller('progreso-lecciones')
 export class ProgresoLeccionesController {
   constructor(private readonly progresoService: ProgresoLeccionesService) {}
 
   @Post()
-  create(@Body() dto: CreateProgresoLeccionDto) {
-    return this.progresoService.create(dto);
-  }
-
-  @Get()
-  findAll() {
-    return this.progresoService.findAll();
+  create(@Body() createProgresoDto: CreateProgresoDto) {
+    return this.progresoService.create(createProgresoDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.progresoService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.progresoService.findOne(id);
+  }
+
+  @Get()
+  findByInscripcion(@Query('inscripcionId', ParseUUIDPipe) inscripcionId: string) {
+    return this.progresoService.findByInscripcion(inscripcionId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProgresoLeccionDto) {
-    return this.progresoService.update(+id, dto);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProgresoDto: UpdateProgresoDto,
+  ) {
+    return this.progresoService.update(id, updateProgresoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.progresoService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.progresoService.remove(id);
   }
 }

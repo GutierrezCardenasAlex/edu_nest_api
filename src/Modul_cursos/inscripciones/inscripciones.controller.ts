@@ -1,36 +1,19 @@
-import { Controller, Post, Get, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { InscripcionesService } from './inscripciones.service';
 import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
-import { UpdateInscripcionDto } from './dto/update-inscripcion.dto';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { Role } from 'src/common/enums/rol.enum';
+
 
 @Controller('inscripciones')
+@UseGuards(AuthGuard)
 export class InscripcionesController {
-    constructor(private readonly inscripcionesService: InscripcionesService) {}
+  constructor(private readonly service: InscripcionesService) {}
 
-    @Post()
-    create(@Body() dto: CreateInscripcionDto) {
-        return this.inscripcionesService.create(dto);
-    }
-
-    @Get()
-    findAll() {
-        return this.inscripcionesService.findAll();
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.inscripcionesService.findOne(+id);
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() dto: UpdateInscripcionDto) {
-        return this.inscripcionesService.update(+id, dto);
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.inscripcionesService.remove(+id);
-    }
-
-
+  @Post()
+  @Roles(Role.USER)
+  inscribirse(@Request() req, @Body() dto: CreateInscripcionDto) {
+    return this.service.crearInscripcion(req.user.id, dto);
+  }
 }

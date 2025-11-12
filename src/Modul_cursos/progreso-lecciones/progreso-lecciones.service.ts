@@ -1,63 +1,95 @@
-import { Injectable } from '@nestjs/common';
+// src/Modul_cursos/progreso-lecciones/progreso-lecciones.service.ts
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProgresoLeccion } from './entities/progreso-leccion.entity';
-import { CreateProgresoLeccionDto } from './dto/create-progreso-leccion.dto';
-import { UpdateProgresoLeccionDto } from './dto/update-progreso-leccion.dto';
+
 import { Inscripcion } from '../inscripciones/entities/inscripcion.entity';
 import { Leccion } from '../lecciones/entities/leccion.entity';
+import { CreateProgresoDto } from './dto/create-progreso-leccion.dto';
+import { UpdateProgresoDto } from './dto/update-progreso-leccion.dto';
 
 @Injectable()
 export class ProgresoLeccionesService {
   constructor(
     @InjectRepository(ProgresoLeccion)
     private readonly progresoRepo: Repository<ProgresoLeccion>,
+
     @InjectRepository(Inscripcion)
     private readonly inscripcionRepo: Repository<Inscripcion>,
+
     @InjectRepository(Leccion)
     private readonly leccionRepo: Repository<Leccion>,
   ) {}
 
-  async create(dto: CreateProgresoLeccionDto): Promise<ProgresoLeccion> {
-    const inscripcion = await this.inscripcionRepo.findOneBy({ id: dto.inscripcionId});
-    if (!inscripcion) throw new Error('Inscripción no encontrada');
+  // CREAR PROGRESO
+  async create(dto: CreateProgresoDto): Promise<ProgresoLeccion> {
+    const inscripcion = await this.inscripcionRepo.findOne({
+      where: { id: dto.inscripcionId },
+    });
+    if (!inscripcion) throw new NotFoundException('Inscripción no encontrada');
 
-    const leccion = await this.leccionRepo.findOneBy({ id: dto.leccionId });
-    if (!leccion) throw new Error('Lección no encontrada');
+    const leccion = await this.leccionRepo.findOne({
+      where: { id: dto.leccionId },
+    });
+    if (!leccion) throw new NotFoundException('Lección no encontrada');
+
+    const yaExiste = await this.progresoRepo.findOne({
+      where: { inscripcion: { id: dto.inscripcionId }, leccion: { id: dto.leccionId } },
+    });
+    if (yaExiste) throw new ConflictException('El progreso ya existe para esta lección e inscripción');
 
     const progreso = this.progresoRepo.create({
       inscripcion,
       leccion,
-      completado: dto.completado ?? false,
+      completada: dto.completada ?? true,
+      fecha_completado: dto.completada ? new Date() : undefined,
     });
 
     return this.progresoRepo.save(progreso);
   }
 
-  findAll(): Promise<ProgresoLeccion[]> {
-    return this.progresoRepo.find({ relations: ['inscripcion', 'leccion'] });
-  }
-
-  findOne(id: number): Promise<ProgresoLeccion | null> {
-    return this.progresoRepo.findOne({
+  // ACTUALIZAR PROGRESO
+  async update(id: string, dto: UpdateProgresoDto): Promise<ProgresoLeccion> {
+    const progreso = await this.progresoRepo.findOne({
       where: { id },
       relations: ['inscripcion', 'leccion'],
     });
-  }
+    if (!progreso) throw new NotFoundException('Progreso no encontrado');
 
-  async update(id: number, dto: UpdateProgresoLeccionDto): Promise<ProgresoLeccion> {
-    const progreso = await this.progresoRepo.findOneBy({ id });
-    if (!progreso) throw new Error('Registro no encontrado');
+    // Actualizar completada
+    progreso.completada = dto.completada;
 
-    Object.assign(progreso, dto);
-    if (dto.completado) {
-      progreso.fechaCompletado = new Date();
-    }
+    // Actualizar fecha_completado
+    progreso.fecha_completado = dto.completada ? new Date() : undefined;
 
     return this.progresoRepo.save(progreso);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.progresoRepo.delete(id);
+  // OBTENER UNO
+  async findOne(id: string): Promise<ProgresoLeccion> {
+    const progreso = await this.progresoRepo.findOne({
+      where: { id },
+      relations: ['inscripcion', 'leccion'],
+    });
+    if (!progreso) throw new NotFoundException('Progreso no encontrado');
+    return progreso;
+  }
+
+  // OBTENER POR INSCRIPCIÓN
+  async findByInscripcion(inscripcionId: string): Promise<ProgresoLeccion[]> {
+    return this.progresoRepo.find({
+      where: { inscripcion: { id: inscripcionId } },
+      relations: ['leccion'],
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  // ELIMINAR
+  async remove(id: string): Promise<void> {
+    const result = await this.progresoRepo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Progreso no encontrado');
+    }
   }
 }

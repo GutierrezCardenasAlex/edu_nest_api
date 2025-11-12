@@ -1,19 +1,16 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsBoolean } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { PaymentMethod } from 'src/appointments/entities/appointment.entity';
 
 export class CreateInscripcionDto {
-    @IsNotEmpty()
-    @IsNumber()
-    cursoId: number;
+  @IsUUID()
+  @IsNotEmpty()
+  cursoId: string;
 
-    @IsNotEmpty()
-    @IsNumber()
-    usuarioId: number;
+  @IsEnum(PaymentMethod)
+  @IsNotEmpty()
+  metodoPago: PaymentMethod;
 
-    @IsOptional()
-    progreso?: number;
-
-    @IsOptional()
-    @IsBoolean()
-    completado?: boolean;
-    
+  @IsString()
+  @IsNotEmpty()
+  comprobante: string; // URL o base64
 }

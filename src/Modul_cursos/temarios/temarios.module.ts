@@ -1,14 +1,16 @@
+// src/Modul_cursos/temarios/temarios.module.ts
 import { Module } from '@nestjs/common';
-import { TemariosService } from './temarios.service';
-import { TemariosController } from './temarios.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TemariosController } from './temarios.controller';
+import { TemariosService } from './temarios.service';
 import { Temario } from './entities/temario.entity';
 import { Curso } from '../cursos/entities/curso.entity';
-
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Temario, Curso])],
+  imports: [AuthModule,TypeOrmModule.forFeature([Temario, Curso])],
+  controllers: [TemariosController],
   providers: [TemariosService],
-  controllers: [TemariosController]
+  exports: [TemariosService],
 })
 export class TemariosModule {}

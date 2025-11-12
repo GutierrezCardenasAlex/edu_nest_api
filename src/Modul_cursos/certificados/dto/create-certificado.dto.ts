@@ -1,14 +1,7 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+// src/Modul_cursos/certificados/dto/create-certificado.dto.ts
+import { IsUUID } from 'class-validator';
 
 export class CreateCertificadoDto {
-    @IsNotEmpty()
-    inscripcionId: number;
-
-    @IsOptional()
-    @IsString()
-    codigo_certificado?: string;
-
-    @IsOptional()
-    @IsString()
-    url_pdf?: string;
+  @IsUUID()
+  inscripcionId: string;
 }

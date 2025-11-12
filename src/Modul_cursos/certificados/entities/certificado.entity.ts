@@ -1,23 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, 
-    CreateDateColumn, ManyToOne, JoinColumn, Unique, } from 'typeorm';
+// src/Modul_cursos/certificados/entities/certificado.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 import { Inscripcion } from '../../inscripciones/entities/inscripcion.entity';
 
 @Entity('certificados')
-@Unique(['codigo_certificado'])
 export class Certificado {
-    @PrimaryGeneratedColumn('increment')
-    id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @ManyToOne(() => Inscripcion, (inscripcion) => inscripcion.certificados, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'inscripcion_id' })
-    inscripcion: Inscripcion;
+  @ManyToOne(() => Inscripcion, (inscripcion) => inscripcion.certificados, {
+    onDelete: 'CASCADE',
+  })
+  inscripcion: Inscripcion;
 
-    @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
-    codigo_certificado: string;
+  @Column({ type: 'date' })
+  fechaEmision: Date;
 
-    @CreateDateColumn({ name: 'timestamp'})
-    fecha_emision: Date;
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    url_pdf: string;
+  @CreateDateColumn()
+  created_at: Date;
 }

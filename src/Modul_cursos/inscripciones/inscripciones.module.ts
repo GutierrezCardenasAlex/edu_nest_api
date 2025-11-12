@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
-import { InscripcionesService } from './inscripciones.service';
-import { InscripcionesController } from './inscripciones.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { InscripcionesController } from './inscripciones.controller';
+import { InscripcionesService } from './inscripciones.service';
 import { Inscripcion } from './entities/inscripcion.entity';
 import { Curso } from '../cursos/entities/curso.entity';
-import { User } from '../../users/entities/user.entity'; 
+import { Payment } from 'src/payments/entities/payment.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Inscripcion, Curso, User])],
+  imports: [AuthModule,TypeOrmModule.forFeature([Inscripcion, Payment, Curso])],
+  controllers: [InscripcionesController],
   providers: [InscripcionesService],
-  controllers: [InscripcionesController]
+  exports: [InscripcionesService],
 })
 export class InscripcionesModule {}

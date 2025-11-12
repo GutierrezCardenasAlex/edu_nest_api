@@ -1,35 +1,53 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Unique, OneToMany,} from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+  OneToOne,
+  JoinColumn,
+  Column,
+  OneToMany,
+} from 'typeorm';
 import { Curso } from '../../cursos/entities/curso.entity';
-import { User } from '../../../users/entities/user.entity';
-import { ProgresoLeccion } from '../../progreso-lecciones/entities/progreso-leccion.entity';
-import { Certificado } from '../../certificados/entities/certificado.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
+import { ProgresoLeccion } from 'src/Modul_cursos/progreso-lecciones/entities/progreso-leccion.entity';
+import { Certificado } from 'src/Modul_cursos/certificados/entities/certificado.entity';
 
+export enum InscripcionStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
 
 @Entity('inscripciones')
-@Unique(['curso', 'usuario'])
 export class Inscripcion {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToOne(() => Curso, (curso) => curso.inscripciones, { onDelete: 'CASCADE' })
-  curso: Curso;
-
-  @ManyToOne(() => User, (user) => user.inscripciones, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.inscripciones)
   usuario: User;
 
-  @CreateDateColumn({ name: 'fecha_inscripcion' })
-    fechaInscripcion: Date;
+  @ManyToOne(() => Curso, (curso) => curso.inscripciones)
+  curso: Curso;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  progreso: number;
+  @Column({
+    type: 'enum',
+    enum: InscripcionStatus,
+    default: InscripcionStatus.PENDING,
+  })
+  estado: InscripcionStatus;
 
-  @Column({ type: 'boolean', default: false })
-  completado: boolean;
+  @CreateDateColumn()
+  created_at: Date;
 
+  @OneToOne(() => Payment, (payment) => payment.inscripcion, { cascade: true })
+  @JoinColumn()
+  pago: Payment;
+  
   @OneToMany(() => ProgresoLeccion, (progreso) => progreso.inscripcion)
   progresos: ProgresoLeccion[];
 
   @OneToMany(() => Certificado, (certificado) => certificado.inscripcion)
-certificados: Certificado[];
-
+  certificados: Certificado[];
 }

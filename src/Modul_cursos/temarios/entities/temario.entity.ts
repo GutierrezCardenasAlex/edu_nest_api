@@ -1,24 +1,43 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany,} from 'typeorm';
+// src/Modul_cursos/temarios/entities/temario.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Curso } from '../../cursos/entities/curso.entity';
 import { Leccion } from '../../lecciones/entities/leccion.entity';
 
 @Entity('temarios')
 export class Temario {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
-  id: number;
-
-  @ManyToOne(() => Curso, (curso) => curso.temarios, { onDelete: 'CASCADE' })
-  curso: Curso;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', length: 255 })
   titulo: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'text', nullable: true })
+  descripcion?: string;
+
+  @Column({ type: 'integer', default: 0 })
   orden: number;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @ManyToOne(() => Curso, (curso) => curso.temarios, {
+    onDelete: 'CASCADE',
+  })
+  curso: Curso;
 
-  @OneToMany(() => Leccion, (leccion) => leccion.temario)
+  @OneToMany(() => Leccion, (leccion) => leccion.temario, {
+    cascade: true,
+  })
   lecciones: Leccion[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

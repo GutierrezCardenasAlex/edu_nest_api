@@ -1,14 +1,14 @@
-import { IsNotEmpty, IsBoolean, IsOptional } from "class-validator";
+// src/Modul_cursos/progreso-lecciones/dto/create-progreso.dto.ts
+import { IsUUID, IsBoolean, IsOptional } from 'class-validator';
 
-export class CreateProgresoLeccionDto {
-    @IsNotEmpty()
-    inscripcionId: number;
+export class CreateProgresoDto {
+  @IsUUID()
+  inscripcionId: string;
 
-    @IsNotEmpty()
-    leccionId: number;
+  @IsUUID()
+  leccionId: string;
 
-    @IsOptional()
-    @IsBoolean()
-    completado?: boolean;
-
+  @IsBoolean()
+  @IsOptional()
+  completada?: boolean;
 }

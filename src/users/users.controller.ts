@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Auth } from '../auth/decorator/auth.decorator';
 import { Role } from '../common/enums/rol.enum';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Auth } from 'src/auth/decorator/auth.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth()

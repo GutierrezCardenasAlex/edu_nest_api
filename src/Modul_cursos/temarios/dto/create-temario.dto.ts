@@ -1,13 +1,18 @@
-import { IsNotEmpty, IsInt, IsOptional } from "class-validator";
+// src/Modul_cursos/temarios/dto/create-temario.dto.ts
+import { IsString, IsInt, Min, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateTemarioDto {
-    @IsNotEmpty()
-    cursoId: number;
+  @IsString()
+  titulo: string;
 
-    @IsNotEmpty()
-    titulo: string;
+  @IsString()
+  @IsOptional()
+  descripcion?: string;
 
-    @IsOptional()
-    @IsInt()
-    orden?: number;
+  @IsInt()
+  @Min(0)
+  orden: number;
+
+  @IsUUID()
+  cursoId: string;
 }
