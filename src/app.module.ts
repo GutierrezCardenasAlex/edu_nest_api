@@ -12,6 +12,7 @@ import { LeccionesModule } from './Modul_cursos/lecciones/lecciones.module';
 import { InscripcionesModule } from './Modul_cursos/inscripciones/inscripciones.module';
 import { ProgresoLeccionesModule } from './Modul_cursos/progreso-lecciones/progreso-lecciones.module';
 import { CertificadosModule } from './Modul_cursos/certificados/certificados.module';
+import { DocenteModule } from './Modul_cursos/docente/docente.module';
 
 
 @Module({
@@ -45,6 +46,7 @@ import { CertificadosModule } from './Modul_cursos/certificados/certificados.mod
     InscripcionesModule,
     ProgresoLeccionesModule,
     CertificadosModule,
+    DocenteModule,
   ],
   controllers: [],
   providers: [],

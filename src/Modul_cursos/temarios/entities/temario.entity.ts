@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany,} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany, JoinColumn,} from 'typeorm';
 import { Curso } from '../../cursos/entities/curso.entity';
 import { Leccion } from '../../lecciones/entities/leccion.entity';
 
@@ -8,6 +8,7 @@ export class Temario {
   id: number;
 
   @ManyToOne(() => Curso, (curso) => curso.temarios, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'curso_id' })
   curso: Curso;
 
   @Column({ type: 'varchar', length: 255 })

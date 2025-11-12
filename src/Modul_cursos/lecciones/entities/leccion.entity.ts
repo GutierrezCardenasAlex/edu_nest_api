@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn, } from 'typeorm';
 import { Temario } from '../../temarios/entities/temario.entity';
 import { OneToMany } from 'typeorm';
 
@@ -15,6 +15,7 @@ export class Leccion {
     id: number;
 
     @ManyToOne(() => Temario, (temario) => temario.lecciones, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'temario_id' })
     temario: Temario;
 
     @Column({ type: 'varchar', length: 255 })
