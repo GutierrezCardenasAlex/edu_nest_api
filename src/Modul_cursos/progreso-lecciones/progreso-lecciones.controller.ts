@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/Modul_cursos/progreso-lecciones/progreso-lecciones.controller.ts
 import {
   Controller,
@@ -10,6 +11,9 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
+=======
+import { Controller, Get, Post, Body, Param, Patch, Put, Delete } from '@nestjs/common';
+>>>>>>> origin/model_cursos
 import { ProgresoLeccionesService } from './progreso-lecciones.service';
 import { CreateProgresoDto } from './dto/create-progreso-leccion.dto';
 import { UpdateProgresoDto } from './dto/update-progreso-leccion.dto';
@@ -39,6 +43,11 @@ export class ProgresoLeccionesController {
     @Body() updateProgresoDto: UpdateProgresoDto,
   ) {
     return this.progresoService.update(id, updateProgresoDto);
+  }
+
+  @Put(':id')
+  updatePut(@Param('id') id: string, @Body() dto: UpdateProgresoLeccionDto) {
+    return this.progresoService.update(+id, dto);
   }
 
   @Delete(':id')

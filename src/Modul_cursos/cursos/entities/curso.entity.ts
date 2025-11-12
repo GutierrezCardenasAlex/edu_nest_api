@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn,
 UpdateDateColumn, OneToMany,} from 'typeorm';
 import { Temario } from '../../temarios/entities/temario.entity';
 import { Inscripcion } from '../../inscripciones/entities/inscripcion.entity';
+import { Docente } from '../../docente/entities/docente.entity';
 
 @Entity('cursos')
 export class Curso {
@@ -23,7 +24,7 @@ export class Curso {
   @Column({ type: 'bigint', nullable: true })
   subcategoria_id: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'bigint', nullable: true })
   docente_id: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
@@ -57,4 +58,7 @@ export class Curso {
 
   @OneToMany(() => Inscripcion, (inscripcion) => inscripcion.curso)
   inscripciones: Inscripcion[];
+
+  @ManyToOne(() => Docente, (docente) => docente.cursos, { eager: true })
+  docente: Docente[];
 }

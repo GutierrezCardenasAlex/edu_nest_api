@@ -4,11 +4,16 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, Repository } from 'typeorm';
-import { Inscripcion, InscripcionStatus } from './entities/inscripcion.entity';
-import { Payment, PaymentStatus } from 'src/payments/entities/payment.entity';
-import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
+import { Repository } from 'typeorm';
+import { Inscripcion } from './entities/inscripcion.entity';
 import { Curso } from '../cursos/entities/curso.entity';
+import { User } from '../../users/entities/user.entity';
+import { Certificado } from '../certificados/entities/certificado.entity';
+import * as PDFDocument from 'pdfkit';
+import * as fs from 'fs-extra';
+import { CreateInscripcionDto } from './dto/create-inscripcion.dto';
+import { UpdateInscripcionDto } from './dto/update-inscripcion.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class InscripcionesService {
@@ -19,6 +24,10 @@ export class InscripcionesService {
     private readonly paymentRepo: Repository<Payment>,
     @InjectRepository(Curso)
     private readonly cursoRepo: Repository<Curso>,
+    @InjectRepository(User)
+    private readonly usuarioRepo: Repository<User>,
+    @InjectRepository(Certificado)
+    private readonly certificadoRepo: Repository<Certificado>,
   ) {}
 
 async crearInscripcion(usuarioId: string, dto: CreateInscripcionDto) {
@@ -55,15 +64,66 @@ async crearInscripcion(usuarioId: string, dto: CreateInscripcionDto) {
     estado: curso.es_gratuito ? PaymentStatus.APPROVED : PaymentStatus.PENDING,
   });
 
-  inscripcion.pago = pago;
-  await this.inscripcionRepo.save(inscripcion);
+  async update(id: number, dto: UpdateInscripcionDto): Promise<Inscripcion> {
+    const inscripcion = await this.inscripcionRepo.findOne({
+      where: { id },
+      relations: ['curso', 'usuario'],
+    });
 
-  return {
-    mensaje: curso.es_gratuito
-      ? 'Inscripción gratuita aprobada'
-      : 'Inscripción creada. Pago pendiente.',
-    inscripcionId: inscripcion.id,
-  };
+    if (!inscripcion) throw new Error('Inscripción no encontrada');
+
+    // Si se completa el curso, genera el certificado
+    const wasCompleted = inscripcion.completado;
+    Object.assign(inscripcion, dto);
+    const updated = await this.inscripcionRepo.save(inscripcion);
+
+    if (!wasCompleted && updated.completado === true) {
+      await this.generarCertificado(updated);
+    }
+
+    return updated;
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.inscripcionRepo.delete(id);
+  }
+
+  private async generarCertificado(inscripcion: Inscripcion) {
+    const codigo = 'CERT-' + randomBytes(5).toString('hex').toUpperCase();
+    const carpeta = 'uploads/certificados';
+    await fs.ensureDir(carpeta);
+    const filePath = `${carpeta}/${codigo}.pdf`;
+
+    // Generar el PDF
+    const doc = new PDFDocument({ size: 'A4', layout: 'landscape' });
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    doc.fontSize(30).text('CERTIFICADO DE FINALIZACIÓN', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(20).text(`Otorgado a: ${inscripcion.usuario.name}`, { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(18).text(
+      `Por haber completado satisfactoriamente el curso: ${inscripcion.curso.titulo}`,
+      { align: 'center' },
+    );
+    doc.moveDown();
+    doc.text(`Código de certificado: ${codigo}`, { align: 'center' });
+    doc.moveDown();
+    doc.text(`Emitido el: ${new Date().toLocaleDateString()}`, { align: 'center' });
+    doc.end();
+
+    await new Promise((resolve) => stream.on('finish', resolve));
+
+    // Guardar en BD
+    const certificado = this.certificadoRepo.create({
+      inscripcion,
+      codigo_certificado: codigo,
+      url_pdf: `${process.env.APP_URL ?? 'http://localhost:3001'}/${filePath}`,
+    });
+
+    await this.certificadoRepo.save(certificado);
+  }
 }
 
 async tieneAcceso(usuarioId: string, cursoId: string): Promise<boolean> {

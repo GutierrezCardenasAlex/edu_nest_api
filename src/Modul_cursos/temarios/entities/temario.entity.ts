@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/Modul_cursos/temarios/entities/temario.entity.ts
 import {
   Entity,
@@ -8,13 +9,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+=======
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany, JoinColumn,} from 'typeorm';
+>>>>>>> origin/model_cursos
 import { Curso } from '../../cursos/entities/curso.entity';
 import { Leccion } from '../../lecciones/entities/leccion.entity';
 
 @Entity('temarios')
 export class Temario {
+<<<<<<< HEAD
   @PrimaryGeneratedColumn('uuid')
   id: string;
+=======
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
+
+  @ManyToOne(() => Curso, (curso) => curso.temarios, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'curso_id' })
+  curso: Curso;
+>>>>>>> origin/model_cursos
 
   @Column({ type: 'varchar', length: 255 })
   titulo: string;

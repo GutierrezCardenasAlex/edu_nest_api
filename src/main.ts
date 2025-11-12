@@ -12,11 +12,11 @@ async function bootstrap() {
 
   // CORS CORREGIDO
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin:['http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: ['Content-Type', 'Authorization'], // CLAVE
     credentials: true,
-  });
+  }); 
 
   const config = new DocumentBuilder()
     .setTitle('LearnHub API')
@@ -27,6 +27,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
+  await app.listen(process.env.PORT ?? 3001);
   const port = process.env.PORT ?? 8000;
   await app.listen(port);
   // console.log(`API corriendo en: http://localhost:${port}/api/v1`);

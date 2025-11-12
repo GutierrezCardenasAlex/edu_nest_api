@@ -13,6 +13,8 @@ import { ProgresoLeccionesModule } from './Modul_cursos/progreso-lecciones/progr
 import { CertificadosModule } from './Modul_cursos/certificados/certificados.module';
 import { CastModule } from './cast/cast.module';
 import { BreedsModule } from './breeds/breeds.module';
+import { DocenteModule } from './Modul_cursos/docente/docente.module';
+
 
 @Module({
   imports: [
@@ -43,6 +45,7 @@ import { BreedsModule } from './breeds/breeds.module';
     CertificadosModule,
     CastModule,
     BreedsModule,
+    DocenteModule,
   ],
 })
 export class AppModule {}
